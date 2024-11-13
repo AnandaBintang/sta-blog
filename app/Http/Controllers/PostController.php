@@ -18,14 +18,12 @@ class PostController extends Controller
      */
     public function home(): View
     {
-        // Latest post
         $latestPost = Post::where('active', '=', 1)
             ->whereDate('published_at', '<', Carbon::now())
             ->orderBy('published_at', 'desc')
             ->limit(1)
             ->first();
 
-        // Show the most popular 3 posts based on upvotes
         $popularPosts = Post::query()
             ->leftJoin('upvote_downvotes', 'posts.id', '=', 'upvote_downvotes.post_id')
             ->select('posts.*', DB::raw('COUNT(upvote_downvotes.id) as upvote_count'))
@@ -53,7 +51,6 @@ class PostController extends Controller
             ->limit(5)
             ->get();
 
-        // If authorized - Show recommended posts based on user upvotes
         $user = auth()->user();
 
         if ($user) {
@@ -97,11 +94,7 @@ class PostController extends Controller
         }
 
 
-        // Show recent categories with their latest posts
         $categories = Category::query()
-            //            ->with(['posts' => function ($query) {
-            //                $query->orderByDesc('published_at');
-            //            }])
             ->whereHas('posts', function ($query) {
                 $query
                     ->where('active', '=', 1)
